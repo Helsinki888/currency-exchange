@@ -1,0 +1,181 @@
+<Window x:Class="Exchange.Client.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Currency Exchange Office" Height="640" Width="960"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+
+        <!-- ================= LOGIN / REGISTER ================= -->
+        <Border x:Name="LoginPanel" VerticalAlignment="Center" HorizontalAlignment="Center"
+                BorderBrush="#CCC" BorderThickness="1" CornerRadius="8" Padding="32" Background="#FAFAFA">
+            <StackPanel Width="320">
+                <TextBlock Text="Currency Exchange Office" FontSize="22" FontWeight="Bold"
+                           HorizontalAlignment="Center" Margin="0,0,0,4" />
+                <TextBlock Text="Sign in or create an account" Foreground="Gray"
+                           HorizontalAlignment="Center" Margin="0,0,0,16" />
+
+                <TextBlock Text="Username" />
+                <TextBox x:Name="LoginUsername" />
+                <TextBlock Text="Password" Margin="0,8,0,0" />
+                <PasswordBox x:Name="LoginPassword" KeyDown="LoginPassword_KeyDown" />
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,16,0,0">
+                    <Button x:Name="LoginButton" Content="Sign in" Width="120" Click="LoginButton_Click" />
+                    <Button x:Name="RegisterButton" Content="Create account" Width="120" Click="RegisterButton_Click" />
+                </StackPanel>
+
+                <TextBlock x:Name="LoginStatus" Foreground="Firebrick" TextWrapping="Wrap"
+                           HorizontalAlignment="Center" Margin="0,12,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- ================= MAIN PANEL ================= -->
+        <DockPanel x:Name="MainPanel" Visibility="Collapsed">
+
+            <Border DockPanel.Dock="Top" Background="#2B3A55" Padding="12,8">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="Log out" Click="LogoutButton_Click" />
+                    <TextBlock x:Name="HeaderUser" Foreground="White" FontSize="16"
+                               VerticalAlignment="Center" />
+                </DockPanel>
+            </Border>
+
+            <StatusBar DockPanel.Dock="Bottom">
+                <TextBlock x:Name="StatusText" Text="Ready." />
+            </StatusBar>
+
+            <TabControl Margin="8">
+
+                <!-- ===== Current rates ===== -->
+                <TabItem Header="Exchange rates">
+                    <Grid Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="0">
+                            <TextBlock Text="Currency:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="RateCurrencyCombo" Width="100" />
+                            <Button Content="Check office rate" Click="CheckOfficeRate_Click" />
+                            <Button Content="Refresh table" Click="RefreshRates_Click" />
+                        </StackPanel>
+
+                        <TextBlock x:Name="OfficeRateText" Grid.Row="1" Margin="4,8"
+                                   FontSize="14" TextWrapping="Wrap" />
+
+                        <DataGrid x:Name="AllRatesGrid" Grid.Row="2">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="80" />
+                                <DataGridTextColumn Header="Currency" Binding="{Binding Currency}" Width="*" />
+                                <DataGridTextColumn Header="NBP mid rate [PLN]" Binding="{Binding Mid, StringFormat=N4}" Width="160" />
+                                <DataGridTextColumn Header="Date" Binding="{Binding EffectiveDate, StringFormat=yyyy-MM-dd}" Width="120" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+                <!-- ===== Historical rates ===== -->
+                <TabItem Header="Historical rates">
+                    <Grid Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="0">
+                            <TextBlock Text="Currency:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="HistCurrencyCombo" Width="100" />
+                            <TextBlock Text="From:" VerticalAlignment="Center" Margin="12,0,0,0" />
+                            <DatePicker x:Name="HistStartDate" Margin="4" />
+                            <TextBlock Text="To:" VerticalAlignment="Center" Margin="12,0,0,0" />
+                            <DatePicker x:Name="HistEndDate" Margin="4" />
+                            <Button Content="Load history" Click="LoadHistory_Click" />
+                        </StackPanel>
+
+                        <DataGrid x:Name="HistoryGrid" Grid.Row="1">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Binding="{Binding EffectiveDate, StringFormat=yyyy-MM-dd}" Width="140" />
+                                <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="80" />
+                                <DataGridTextColumn Header="NBP mid rate [PLN]" Binding="{Binding Mid, StringFormat=N4}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+                <!-- ===== My account ===== -->
+                <TabItem Header="My account">
+                    <Grid Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Orientation="Horizontal" Grid.Row="0">
+                            <TextBlock Text="Top up (PLN):" VerticalAlignment="Center" />
+                            <TextBox x:Name="DepositAmount" Width="120" />
+                            <Button Content="Simulated transfer" Click="Deposit_Click" />
+                            <Button Content="Refresh balances" Click="RefreshBalances_Click" />
+                        </StackPanel>
+
+                        <DataGrid x:Name="BalancesGrid" Grid.Row="1">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Currency" Binding="{Binding CurrencyCode}" Width="120" />
+                                <DataGridTextColumn Header="Balance" Binding="{Binding Amount, StringFormat=N2}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+                <!-- ===== Buy / sell ===== -->
+                <TabItem Header="Buy / sell currency">
+                    <StackPanel Margin="8" MaxWidth="520" HorizontalAlignment="Left">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Currency:" VerticalAlignment="Center" />
+                            <ComboBox x:Name="ExchangeCurrencyCombo" Width="100"
+                                      SelectionChanged="ExchangeCurrencyCombo_SelectionChanged" />
+                            <TextBlock Text="Amount:" VerticalAlignment="Center" Margin="12,0,0,0" />
+                            <TextBox x:Name="ExchangeAmount" Width="120" />
+                        </StackPanel>
+
+                        <TextBlock x:Name="ExchangeRateInfo" Margin="4,8" FontSize="14" TextWrapping="Wrap" />
+
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="BuyButton" Content="Buy" Width="140" Click="Buy_Click" />
+                            <Button x:Name="SellButton" Content="Sell" Width="140" Click="Sell_Click" />
+                        </StackPanel>
+
+                        <TextBlock x:Name="ExchangeResult" Margin="4,12" TextWrapping="Wrap" FontSize="13" />
+                    </StackPanel>
+                </TabItem>
+
+                <!-- ===== Transaction history ===== -->
+                <TabItem Header="Transaction history">
+                    <Grid Margin="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Button Grid.Row="0" Content="Refresh history" HorizontalAlignment="Left"
+                                Click="RefreshTransactions_Click" />
+
+                        <DataGrid x:Name="TransactionsGrid" Grid.Row="1">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="60" />
+                                <DataGridTextColumn Header="Date (UTC)" Binding="{Binding Timestamp, StringFormat=yyyy-MM-dd HH:mm:ss}" Width="160" />
+                                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="90" />
+                                <DataGridTextColumn Header="Currency" Binding="{Binding CurrencyCode}" Width="90" />
+                                <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=N2}" Width="110" />
+                                <DataGridTextColumn Header="Rate [PLN]" Binding="{Binding Rate, StringFormat=N4}" Width="110" />
+                                <DataGridTextColumn Header="Value [PLN]" Binding="{Binding PlnValue, StringFormat=N2}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+            </TabControl>
+        </DockPanel>
+    </Grid>
+</Window>
